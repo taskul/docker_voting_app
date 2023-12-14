@@ -1,7 +1,4 @@
-# This docker file is a copy of a file from this project
-# https://github.com/dockersamples/example-voting-app/blob/main/vote/Dockerfile#L12
-
-# Define a base stage that uses the official python runtime base image
+# install python version 3.11
 FROM python:3.11-slim AS base
 
 RUN apt-get update && \
@@ -15,21 +12,18 @@ WORKDIR /usr/local/app
 COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Define a stage specifically for development, where it'll watch for
-# filesystem changes
+# Development stage
 FROM base AS dev
-RUN pip install watchdog
 ENV FLASK_ENV=development
 CMD ["python", "app.py"]
 
 # Define the final stage that will bundle the application for production
 FROM base AS final
-
 # Copy our code from the current folder to the working directory inside the container
 COPY . .
 
-# Make port 80 available for links and/or publish
+# This informs Docker that the application inside the container will use port 80, and this port should be made available for external connections.
 EXPOSE 80
 
-# Define our command to be run when launching the container
+# Define the command to run the application using Gunicorn for production
 CMD ["gunicorn", "app:app", "-b", "0.0.0.0:80", "--log-file", "-", "--access-logfile", "-", "--workers", "4", "--keep-alive", "0"]
