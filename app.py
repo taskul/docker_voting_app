@@ -34,8 +34,7 @@ class Vote(db.Model):
 class VoteForm(FlaskForm):
     vote = SelectField('Select cat or dog', choices=[('cat', 'Cat'), ('dog', 'Dog')])
 
-@app.before_first_request
-def create_tables():
+with app.app_context():
     db.create_all()
 
 @app.route('/', methods=['GET', 'POST'])
@@ -54,4 +53,4 @@ def home():
     return render_template('index.html', cat=vote.cat, dog=vote.dog, form=form)
 
 if __name__ =='__main__':
-    app.run(debug=True)
+    app.run()
